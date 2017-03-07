@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<head>
+    <title>BarISTa</title>
+    <link rel="stylesheet" href="geral.css">
+    <link rel="stylesheet" href="bemvindo.css">
+
+</head>
+
+<body>
+    <div id="mesa">
+        <div id="top_bar">
+            <div id="titulo">Bem-vindo ao BarISTa!</div>
+        </div>
+        <div id="time"></div>
+
+
+        <div id="message">
+            <h1>Aviso</h1>
+            <div id="texto">
+                <p id="introdutorio"></p>
+                <p id="preencher"></p>
+                <p id="preco"></p>
+            </div>
+
+            <div id="escolhas">
+                <img id="ok" src="imgs/check.png">
+                <img id="not_ok" src="imgs/cancel.png">
+            </div>
+        </div>
+
+        <div id="keyboard">
+            <img id="kb" src="imgs/keyboard.png">
+            <img id="kb_exit" src="imgs/cancel.png" onclick="keyboard(0)">
+        </div>
+
+
+        <div id="main">
+
+
+
+            <div id="login" class="box1">
+                <div id="titulo_login"><b>Autenticação</b></div>
+
+                <div class="wrap">
+
+                    <div id="login_opcoes">
+                        <div id="escolha" class="login_credentials">
+                            <div class="label">Entrar com</div>
+                            <select onclick="keyboard(0)" onchange="escolhas()" id="escolha_select">
+                                <option value="Nome" selected>Nome</option>
+                                <option value="Email">Email</option>
+                            </select>
+                        </div>
+
+                        <div id="utilizador" class="login_credentials">
+                            <div class="label">Nome de utilizador</div>
+                            <div class="insert">
+                                <input onclick="keyboard(1)" placeholder="Introduza o nome de utilizador..." type="text" id="login_utilizador" value="">
+                            </div>
+                        </div>
+
+                        <div id="email" class="login_credentials">
+                            <div class="label">Email</div>
+                            <div class="insert">
+                                <input onclick="keyboard(1)" placeholder="Introduza o email..." type="text" id="login_email" value="">
+                            </div>
+                        </div>
+
+                        <div class="login_credentials">
+                            <div class="label">Palavra passe</div>
+                            <div class="insert">
+                                <input onclick="keyboard(1)" placeholder="Introduza a sua password..." type="password" id="login_pass" value="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="keyboard(0)" id="entrar">
+                        <button id="entrar_button">Entrar</button>
+                    </div>
+                </div>
+
+                <div id="error_message">Erro: palavra passe errada</div>
+
+
+                <div id="login_buttons">
+                    <button id="button_esquecime" onclick="window.location.href = 'bemvindo_esquecime.html'">Esqueci-me da palavra passe</button>
+                    <button id="button_criar" onclick="window.location.href = 'bemvindo_criarconta.html'">Criar conta</button>
+                    <button id="button_convidado" onclick="guest()">Entrar como convidado</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="bottom">
+            <img id="help" src="imgs/help.png">
+            <button type="button" id="empregado" class="button1" onclick="chamar_empregado_confirmar()">
+                Chamar empregado
+            </button>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="geral.js"></script>
+    <script type="text/javascript">
+        function escolhas() {
+            var e = document.getElementById("escolha_select")
+                , utilizador = document.getElementById("utilizador")
+                , email = document.getElementById("email");
+
+            if (e.selectedIndex == "0") {
+                email.style.display = "none";
+                utilizador.style.display = "block";
+            } else {
+                email.style.display = "block";
+                utilizador.style.display = "none";
+            }
+        }
+
+        function show_entrar() {
+            var entrar = document.getElementById("entrar_button")
+                , data, pass = document.getElementById("login_pass").value,
+
+                e = document.getElementById("escolha_select").selectedIndex;
+
+
+            if (e == "0")
+                data = document.getElementById("login_utilizador").value;
+
+            else
+                data = document.getElementById("login_email").value;
+
+            if (pass == "" || data == "") {
+
+                entrar.style.backgroundColor = "#585858";
+                entrar.style.borderColor = "white";
+                entrar.setAttribute("onClick", "");
+
+            } else {
+                entrar.style.backgroundColor = "black";
+                entrar.style.borderColor = "green";
+
+                if (e == "0")
+                    entrar.setAttribute("onClick", "login_username()");
+                else
+                    entrar.setAttribute("onClick", "login_email()");
+            }
+
+
+        }
+
+        function login_username() {
+            var username =
+                document.getElementById("login_utilizador").value
+                , pass =
+                document.getElementById("login_pass").value
+                , error = document.getElementById("error_message");
+
+            if (check_utilizador(username) == 0) {
+                error.innerHTML = "Erro: Utilizador não registado."
+                error.style.display = "block";
+                return;
+            }
+
+            if (check_pass(username, pass) == 0) {
+                error.innerHTML = "Erro: Palavra passe errada.";
+                error.style.display = "block";
+                return;
+            }
+
+            if (check_pass(username, pass)) {
+                change_utilizador_atual(username);
+                load_utilizador_historico();
+                load_utilizador_favoritos();
+                window.location.href = "inicio.html";
+            }
+        }
+
+        function login_email() {
+            var email =
+                document.getElementById("login_email").value
+                , pass =
+                document.getElementById("login_pass").value
+                , error = document.getElementById("error_message")
+                , username;
+
+            if (check_email(email) == 0) {
+                error.innerHTML = "Erro: Utilizador não registado."
+                error.style.display = "block";
+                return;
+            }
+
+            username = check_utilizador_from_email(email);
+
+            if (check_pass(username, pass) == 0) {
+                error.innerHTML = "Erro: Palavra passe errada.";
+                error.style.display = "block";
+                return;
+            }
+
+            if (check_pass(username, pass)) {
+                change_utilizador_atual(username);
+                load_utilizador_historico();
+                load_utilizador_favoritos();
+                window.location.href = "inicio.html";
+            }
+        }
+
+
+
+        function guest() {
+            change_utilizador_atual("Convidado");
+            window.location.href = "inicio.html";
+        }
+
+
+
+        function checkTime(i) {
+            if (i < 10) i = "0" + i;
+            return i;
+        }
+
+
+
+        function time() {
+            var d = new Date()
+                , h = d.getHours()
+                , m = d.getMinutes(),
+
+                m = checkTime(m);
+
+            document.getElementById("time").innerHTML = h + ":" + m;
+
+        }
+
+        window.onload = function () {
+            var_session_storage();
+
+            document.getElementById("email").style.display = "none";
+
+            time();
+            setInterval(time, 500);
+            setInterval(show_entrar, 100);
+        }
+    </script>
+</body>
+
+</html>
